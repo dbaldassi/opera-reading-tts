@@ -1,4 +1,8 @@
+console.log('Content script loaded');
+
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM content loaded');
+
     // Vérifie si l'utilisateur est en mode "reader view"
     if (document.body.classList.contains('reader-view')) {
         console.log('Reader view detected');
