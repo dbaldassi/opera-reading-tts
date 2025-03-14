@@ -16,6 +16,12 @@ document.getElementById('speakButton').addEventListener('click', () => {
                             // Utilise Readability pour extraire le contenu principal
                             const article = new Readability(document.cloneNode(true)).parse();
                             if (article) {
+                                document.body.innerHTML = `
+                                    <article>
+                                        <h1>${article.title}</h1>
+                                        <div>${article.content}</div>
+                                    </article>
+                                `;
                                 return {
                                     title: article.title || 'Titre indisponible',
                                     content: article.textContent || 'Contenu indisponible',
