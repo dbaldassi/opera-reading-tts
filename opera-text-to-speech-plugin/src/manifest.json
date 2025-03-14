@@ -12,13 +12,6 @@
   "host_permissions": [
    "*://*/*"
   ],
-  "content_scripts": [
-    {
-      "matches": [
-        "http://*/*",
-        "https://*/*"]
-    }
-  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
