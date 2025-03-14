@@ -29,13 +29,25 @@ document.getElementById('speakButton').addEventListener('click', () => {
                         if (results && results[0] && results[0].result) {
                             const { title, content } = results[0].result;
 
-                            // Crée une instance de SpeechSynthesisUtterance pour lire le texte
-                            utterance = new SpeechSynthesisUtterance(`${title}. ${content}`);
-                            utterance.pitch = 1.0; // Intonation normale
-                            utterance.rate = 1.0;  // Vitesse normale
+                            // Lecture des titres avec une intonation différente
+                            const titleUtterance = new SpeechSynthesisUtterance(title);
+                            titleUtterance.pitch = 1.5; // Intonation plus élevée pour les titres
+                            titleUtterance.rate = 1.2;  // Légèrement plus rapide
 
-                            // Démarre la lecture
-                            speechSynthesis.speak(utterance);
+                            // Lecture du contenu principal
+                            const contentUtterance = new SpeechSynthesisUtterance(content);
+                            contentUtterance.pitch = 1.0; // Intonation normale
+                            contentUtterance.rate = 1.0;  // Vitesse normale
+
+                            // Enchaîne la lecture des titres et du contenu
+                            speechSynthesis.speak(titleUtterance);
+                            titleUtterance.onend = () => {
+                                speechSynthesis.speak(contentUtterance);
+                            };
+
+                            // Réinitialise le texte du bouton Pause
+                            const pauseButton = document.getElementById('pauseButton');
+                            pauseButton.textContent = 'Pause';
                         } else {
                             console.error('Failed to extract readable content.');
                         }
@@ -48,9 +60,15 @@ document.getElementById('speakButton').addEventListener('click', () => {
 
 // Bouton Pause
 document.getElementById('pauseButton').addEventListener('click', () => {
+    const pauseButton = document.getElementById('pauseButton');
     if (speechSynthesis.speaking && !speechSynthesis.paused) {
         speechSynthesis.pause();
+        pauseButton.textContent = 'Reprendre';
         console.log('Speech paused');
+    } else if (speechSynthesis.paused) {
+        speechSynthesis.resume();
+        pauseButton.textContent = 'Pause';
+        console.log('Speech resumed');
     }
 });
 
@@ -59,5 +77,9 @@ document.getElementById('stopButton').addEventListener('click', () => {
     if (speechSynthesis.speaking) {
         speechSynthesis.cancel();
         console.log('Speech stopped');
+
+        // Réinitialise le texte du bouton Pause
+        const pauseButton = document.getElementById('pauseButton');
+        pauseButton.textContent = 'Pause';
     }
 });
