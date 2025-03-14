@@ -14,14 +14,14 @@ document.getElementById('speakButton').addEventListener('click', () => {
                             // Utilise Readability pour extraire le contenu principal
                             const article = new Readability(document.cloneNode(true)).parse();
 
-                            // Recherche un titre alternatif si article.title est vide
-                            let title = article?.title || 
-                                        document.querySelector('h2')?.innerText || 
-                                        document.querySelector('h3')?.innerText || 
-                                        document.title || 'Titre indisponible';
+                            // Recherche et concatène tous les titres (h1, h2, h3)
+                            const titles = Array.from(document.querySelectorAll('h1, h2, h3'))
+                                .map(el => el.innerText.trim())
+                                .filter(text => text.length > 0) // Filtre les titres vides
+                                .join('. '); // Concatène les titres avec un point
 
                             return {
-                                title: title,
+                                title: titles || 'Aucun titre trouvé',
                                 content: article?.textContent || 'Contenu indisponible',
                             };
                         },
