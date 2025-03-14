@@ -6,17 +6,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('Message received in background:', request);
-    if (request.action === "triggerTTS") {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            const tabId = tabs[0].id;
-            chrome.scripting.executeScript({
-                target: { tabId: tabId },
-                files: ['content.js']
-            }, () => {
-                console.log('Content script injected');
-            });
-        });
-    } else if (request.action === "speakText") {
+    if (request.action === "speakText") {
         const utterance = new SpeechSynthesisUtterance(request.text);
         speechSynthesis.speak(utterance);
         sendResponse({ status: "speaking" });
