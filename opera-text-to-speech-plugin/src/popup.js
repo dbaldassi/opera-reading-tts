@@ -1,3 +1,5 @@
+let utterance; // Variable pour stocker l'instance de SpeechSynthesisUtterance
+
 document.getElementById('speakButton').addEventListener('click', () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const tabId = tabs[0].id;
@@ -13,23 +15,27 @@ document.getElementById('speakButton').addEventListener('click', () => {
                         func: () => {
                             // Utilise Readability pour extraire le contenu principal
                             const article = new Readability(document.cloneNode(true)).parse();
-
-                            // Recherche et concatène tous les titres (h1, h2, h3)
-                            const titles = Array.from(document.querySelectorAll('h1, h2, h3'))
-                                .map(el => el.innerText.trim())
-                                .filter(text => text.length > 0) // Filtre les titres vides
-                                .join('. '); // Concatène les titres avec un point
-
-                            return {
-                                title: titles || 'Aucun titre trouvé',
-                                content: article?.textContent || 'Contenu indisponible',
-                            };
+                            if (article) {
+                                return {
+                                    title: article.title || 'Titre indisponible',
+                                    content: article.textContent || 'Contenu indisponible',
+                                };
+                            } else {
+                                return null;
+                            }
                         },
                     },
                     (results) => {
                         if (results && results[0] && results[0].result) {
                             const { title, content } = results[0].result;
-                            chrome.runtime.sendMessage({ action: 'speakText', titles: title, content: content });
+
+                            // Crée une instance de SpeechSynthesisUtterance pour lire le texte
+                            utterance = new SpeechSynthesisUtterance(`${title}. ${content}`);
+                            utterance.pitch = 1.0; // Intonation normale
+                            utterance.rate = 1.0;  // Vitesse normale
+
+                            // Démarre la lecture
+                            speechSynthesis.speak(utterance);
                         } else {
                             console.error('Failed to extract readable content.');
                         }
@@ -38,4 +44,20 @@ document.getElementById('speakButton').addEventListener('click', () => {
             }
         );
     });
+});
+
+// Bouton Pause
+document.getElementById('pauseButton').addEventListener('click', () => {
+    if (speechSynthesis.speaking && !speechSynthesis.paused) {
+        speechSynthesis.pause();
+        console.log('Speech paused');
+    }
+});
+
+// Bouton Arrêter
+document.getElementById('stopButton').addEventListener('click', () => {
+    if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+        console.log('Speech stopped');
+    }
 });
