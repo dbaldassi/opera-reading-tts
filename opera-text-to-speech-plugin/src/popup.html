@@ -10,11 +10,6 @@
     <h1>Text to Speech</h1>
     <p>Utilisez le mode "reader view" pour activer la lecture du texte.</p>
     <button id="speakButton">Lire le texte</button>
-
-    <script>
-        document.getElementById('speakButton').addEventListener('click', () => {
-            chrome.runtime.sendMessage({ action: 'triggerTTS' });
-        });
-    </script>
+    <script src="popup.js"></script>
 </body>
 </html>
