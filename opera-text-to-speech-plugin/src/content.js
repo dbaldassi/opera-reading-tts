@@ -19,3 +19,12 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Not in reader view');
     }
 });
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "speakText") {
+        console.log('Speaking text:', request.text);
+        const utterance = new SpeechSynthesisUtterance(request.text);
+        speechSynthesis.speak(utterance);
+        sendResponse({ status: "speaking" });
+    }
+});
