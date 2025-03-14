@@ -8,11 +8,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('Message received in background:', request);
 
     if (request.action === "speakText") {
-        // Vérifie si sender.tab est défini
         const tabId = sender.tab ? sender.tab.id : null;
 
         if (tabId) {
-            // Envoie un message au script de contenu pour lire le titre et le contenu
+            console.log('Sending message to content script with tabId:', tabId);
             chrome.tabs.sendMessage(tabId, { 
                 action: "speakText", 
                 titles: request.titles, 
@@ -20,9 +19,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             });
             sendResponse({ status: "forwarded to content script" });
         } else {
-            // Si sender.tab est undefined, récupère l'onglet actif
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs.length > 0) {
+                    console.log('Sending message to active tab:', tabs[0].id);
                     chrome.tabs.sendMessage(tabs[0].id, { 
                         action: "speakText", 
                         titles: request.titles, 
@@ -35,8 +34,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 }
             });
 
-            // Indique que la réponse sera envoyée de manière asynchrone
-            return true;
+            return true; // Indique que la réponse sera envoyée de manière asynchrone
         }
     }
 });

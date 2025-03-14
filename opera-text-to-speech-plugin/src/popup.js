@@ -13,13 +13,20 @@ document.getElementById('speakButton').addEventListener('click', () => {
                         func: () => {
                             // Utilise Readability pour extraire le contenu principal
                             const article = new Readability(document.cloneNode(true)).parse();
-                            return article ? article.textContent : 'Impossible d\'extraire le contenu.';
+                            if (article) {
+                                return {
+                                    title: article.title || 'Titre indisponible',
+                                    content: article.textContent || 'Contenu indisponible',
+                                };
+                            } else {
+                                return null;
+                            }
                         },
                     },
                     (results) => {
                         if (results && results[0] && results[0].result) {
-                            const textContent = results[0].result;
-                            chrome.runtime.sendMessage({ action: 'speakText', text: textContent });
+                            const { title, content } = results[0].result;
+                            chrome.runtime.sendMessage({ action: 'speakText', titles: title, content: content });
                         } else {
                             console.error('Failed to extract readable content.');
                         }

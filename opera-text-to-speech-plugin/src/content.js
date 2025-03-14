@@ -24,24 +24,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "speakText") {
-        console.log('Speaking text:', request);
+        console.log('Received message in content script:', request);
 
-        // Lecture des titres avec une intonation différente
-        const titleUtterance = new SpeechSynthesisUtterance(request.titles);
-        titleUtterance.pitch = 1.5; // Intonation plus élevée pour les titres
-        titleUtterance.rate = 1.2;  // Légèrement plus rapide
+        // Vérifie si les titres et le contenu sont présents
+        if (request.titles && request.content) {
+            console.log('Speaking titles and content:', request.titles, request.content);
 
-        // Lecture du contenu principal
-        const contentUtterance = new SpeechSynthesisUtterance(request.content);
-        contentUtterance.pitch = 1.0; // Intonation normale
-        contentUtterance.rate = 1.0;  // Vitesse normale
+            // Lecture des titres avec une intonation différente
+            const titleUtterance = new SpeechSynthesisUtterance(request.titles);
+            titleUtterance.pitch = 1.5; // Intonation plus élevée pour les titres
+            titleUtterance.rate = 1.2;  // Légèrement plus rapide
 
-        // Enchaîne la lecture des titres et du contenu
-        speechSynthesis.speak(titleUtterance);
-        titleUtterance.onend = () => {
-            speechSynthesis.speak(contentUtterance);
-        };
+            // Lecture du contenu principal
+            const contentUtterance = new SpeechSynthesisUtterance(request.content);
+            contentUtterance.pitch = 1.0; // Intonation normale
+            contentUtterance.rate = 1.0;  // Vitesse normale
 
-        sendResponse({ status: "speaking" });
+            // Enchaîne la lecture des titres et du contenu
+            speechSynthesis.speak(titleUtterance);
+            titleUtterance.onend = () => {
+                speechSynthesis.speak(contentUtterance);
+            };
+
+            sendResponse({ status: "speaking" });
+        } else {
+            console.error('Error: Titles or content missing in the message.');
+            sendResponse({ status: "error", message: "Titles or content missing" });
+        }
     }
 });
