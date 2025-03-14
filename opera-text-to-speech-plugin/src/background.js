@@ -12,14 +12,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const tabId = sender.tab ? sender.tab.id : null;
 
         if (tabId) {
-            // Envoie un message au script de contenu pour lire le texte
-            chrome.tabs.sendMessage(tabId, { action: "speakText", text: request.text });
+            // Envoie un message au script de contenu pour lire le titre et le contenu
+            chrome.tabs.sendMessage(tabId, { 
+                action: "speakText", 
+                titles: request.titles, 
+                content: request.content 
+            });
             sendResponse({ status: "forwarded to content script" });
         } else {
             // Si sender.tab est undefined, récupère l'onglet actif
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs.length > 0) {
-                    chrome.tabs.sendMessage(tabs[0].id, { action: "speakText", text: request.text });
+                    chrome.tabs.sendMessage(tabs[0].id, { 
+                        action: "speakText", 
+                        titles: request.titles, 
+                        content: request.content 
+                    });
                     sendResponse({ status: "forwarded to content script via active tab" });
                 } else {
                     console.error('Error: No active tab found. Cannot send message to content script.');
