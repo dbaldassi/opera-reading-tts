@@ -7,12 +7,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.body.classList.contains('reader-view')) {
         console.log('Reader view detected');
         
-        // Extrait le texte du document
-        const textContent = document.body.innerText;
-        console.log('Text content extracted:', textContent);
+        // Extrait les titres (par exemple, <h1>, <h2>)
+        const titles = Array.from(document.querySelectorAll('h1, h2')).map(el => el.innerText).join('. ');
 
-        // Envoie le texte au script d'arrière-plan pour traitement
-        chrome.runtime.sendMessage({ action: 'speakText', text: textContent }, function(response) {
+        // Extrait le contenu principal
+        const content = document.body.innerText;
+
+        // Envoie les titres et le contenu pour lecture
+        chrome.runtime.sendMessage({ action: 'speakText', titles, content }, function(response) {
             console.log('Response from background:', response);
         });
     } else {
@@ -22,9 +24,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "speakText") {
-        console.log('Speaking text:', request.text);
-        const utterance = new SpeechSynthesisUtterance(request.text);
-        speechSynthesis.speak(utterance);
+        console.log('Speaking text:', request);
+
+        // Lecture des titres avec une intonation différente
+        const titleUtterance = new SpeechSynthesisUtterance(request.titles);
+        titleUtterance.pitch = 1.5; // Intonation plus élevée pour les titres
+        titleUtterance.rate = 1.2;  // Légèrement plus rapide
+
+        // Lecture du contenu principal
+        const contentUtterance = new SpeechSynthesisUtterance(request.content);
+        contentUtterance.pitch = 1.0; // Intonation normale
+        contentUtterance.rate = 1.0;  // Vitesse normale
+
+        // Enchaîne la lecture des titres et du contenu
+        speechSynthesis.speak(titleUtterance);
+        titleUtterance.onend = () => {
+            speechSynthesis.speak(contentUtterance);
+        };
+
         sendResponse({ status: "speaking" });
     }
 });
