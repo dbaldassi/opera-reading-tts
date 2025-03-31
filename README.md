@@ -17,10 +17,6 @@ This plugin enables text-to-speech functionality when using the "reader view" mo
    ```
    cd opera-text-to-speech-plugin
    ```
-3. Install dependencies:
-   ```
-   npm install
-   ```
 
 ## Usage
 1. Load the unpacked extension in Opera:
